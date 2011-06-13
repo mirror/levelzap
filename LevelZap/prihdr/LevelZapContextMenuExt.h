@@ -33,7 +33,9 @@
 class ATL_NO_VTABLE CLevelZapContextMenuExt :
 	public CComObjectRootEx<CComSingleThreadModel>,
 	public CComCoClass<CLevelZapContextMenuExt, &CLSID_LevelZapContextMenuExt>,
-	public ILevelZapContextMenuExt
+	public ILevelZapContextMenuExt,
+    public IShellExtInit,
+    public IContextMenu
 {
 public:
 	CLevelZapContextMenuExt()
@@ -46,6 +48,8 @@ DECLARE_NOT_AGGREGATABLE(CLevelZapContextMenuExt)
 
 BEGIN_COM_MAP(CLevelZapContextMenuExt)
 	COM_INTERFACE_ENTRY(ILevelZapContextMenuExt)
+    COM_INTERFACE_ENTRY(IShellExtInit)
+    COM_INTERFACE_ENTRY(IContextMenu)
 END_COM_MAP()
 
 
@@ -62,9 +66,15 @@ END_COM_MAP()
 	}
 
 public:
+    // IShellExtInit methods
+    STDMETHOD(Initialize)(PCIDLIST_ABSOLUTE p_pFolderPIDL, IDataObject *p_pDataObject, HKEY p_hKeyFileClass);
 
-
-
+    // IContextMenu methods
+    STDMETHOD(QueryContextMenu)(HMENU p_hMenu, UINT p_Index, UINT p_FirstCmdId,
+                                UINT p_LastCmdId, UINT p_Flags);
+    STDMETHOD(InvokeCommand)(CMINVOKECOMMANDINFO* p_pCommandInfo);
+    STDMETHOD(GetCommandString)(UINT_PTR p_CmdId, UINT p_Flags, UINT* p_pReserved,
+                                LPSTR p_pBuffer, UINT p_BufferSize);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(LevelZapContextMenuExt), CLevelZapContextMenuExt)
