@@ -287,6 +287,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\GuidString.cpp" />
+    <ClCompile Include="src\Nullable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include=".\prihdr\dllmain.h" />
@@ -296,6 +298,11 @@
     <ClInclude Include=".\prihdr\stdafx.h" />
     <ClInclude Include=".\prihdr\targetver.h" />
     <ClInclude Include=".\prihdr\xdlldata.h" />
+    <ClInclude Include="prihdr\ArrayAutoPtr.h" />
+    <ClInclude Include="prihdr\GuidString.h" />
+    <ClInclude Include="prihdr\LevelZapTypes.h" />
+    <ClInclude Include="prihdr\Nullable.h" />
+    <ClInclude Include="prihdr\StStgMedium.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include=".\rsrc\LevelZap.rc" />

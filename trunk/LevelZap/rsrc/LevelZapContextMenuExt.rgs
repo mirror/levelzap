@@ -12,4 +12,14 @@ HKCR
 			Version = s '1.0'
 		}
 	}
+	NoRemove Folder
+	{
+		NoRemove shellex
+		{
+			ContextMenuHandlers
+			{
+				ForceRemove LevelZap = s '{5F439FCB-CE37-451A-9959-051D07A94BC6}'
+			}
+		}
+	}
 }

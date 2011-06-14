@@ -1,4 +1,4 @@
-// stdafx.h
+// GuidString.h
 // (c) 2011, Charles Lechasseur
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -7,10 +7,10 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-//
+// 
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-//
+// 
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,31 +21,26 @@
 
 #pragma once
 
-#ifndef STRICT
-#define STRICT
-#endif
 
-#include "targetver.h"
+//
+// GuidString
+//
+// Class that generates a random string by getting the string
+// representation of a random GUID.
+//
+class GuidString
+{
+public:
+                        GuidString();
+                        GuidString(const GuidString& p_GuidString);
+                        ~GuidString();
 
-#define _ATL_APARTMENT_THREADED
+    GuidString&         operator=(const GuidString& p_GuidString);
 
-#define _ATL_NO_AUTOMATIC_NAMESPACE
+    const GUID&         Id() const;
+    const std::wstring& String() const;
 
-#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// some CString constructors will be explicit
-
-
-#define ATL_NO_ASSERT_ON_DESTROY_NONEXISTENT_WINDOW
-
-#include "resource.h"
-#include <atlbase.h>
-#include <atlcom.h>
-#include <atlctl.h>
-#include <atlstr.h>
-#include <shlobj.h>
-#include <shobjidl.h>
-#include <windows.h>
-
-#include <string>
-#include <vector>
-
-using namespace ATL;
+private:
+    GUID                m_Id;       // The random GUID we use.
+    std::wstring        m_String;   // String representation of the GUID.
+};

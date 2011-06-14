@@ -37,6 +37,12 @@
     <ClCompile Include=".\src\LevelZapContextMenuExt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Nullable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GuidString.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include=".\generated\LevelZap_i.h">
@@ -58,6 +64,21 @@
       <Filter>Private Header Files</Filter>
     </ClInclude>
     <ClInclude Include=".\prihdr\xdlldata.h">
+      <Filter>Private Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="prihdr\LevelZapTypes.h">
+      <Filter>Private Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="prihdr\StStgMedium.h">
+      <Filter>Private Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="prihdr\Nullable.h">
+      <Filter>Private Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="prihdr\ArrayAutoPtr.h">
+      <Filter>Private Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="prihdr\GuidString.h">
       <Filter>Private Header Files</Filter>
     </ClInclude>
   </ItemGroup>
