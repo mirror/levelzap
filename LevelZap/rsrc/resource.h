@@ -4,6 +4,10 @@
 //
 #define IDS_PROJNAME                    100
 #define IDR_LEVELZAP                    101
+#define IDS_ZAP_MENU_ITEM_DESCRIPTION   101
+#define IDS_ZAP_MENU_ITEM_HINT          102
+#define IDS_MOVE_BEFORE_ZAP_DIALOG_TITLE 103
+#define IDS_ZAP_DIALOG_TITLE            104
 #define IDR_LEVELZAPCONTEXTMENUEXT      106
 
 // Next default values for new objects

@@ -1,5 +1,5 @@
-// stdafx.h
-// (c) 2011, Charles Lechasseur
+// Nullable.cpp
+// (c) 2008-2011, Charles Lechasseur
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -19,33 +19,48 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#pragma once
-
-#ifndef STRICT
-#define STRICT
-#endif
-
-#include "targetver.h"
-
-#define _ATL_APARTMENT_THREADED
-
-#define _ATL_NO_AUTOMATIC_NAMESPACE
-
-#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// some CString constructors will be explicit
+#include "stdafx.h"
+#include "Nullable.h"
 
 
-#define ATL_NO_ASSERT_ON_DESTROY_NONEXISTENT_WINDOW
+//
+// Default constructor.
+//
+ValueNotSetException::ValueNotSetException()
+    : std::exception()
+{
+}
 
-#include "resource.h"
-#include <atlbase.h>
-#include <atlcom.h>
-#include <atlctl.h>
-#include <atlstr.h>
-#include <shlobj.h>
-#include <shobjidl.h>
-#include <windows.h>
+//
+// Copy constructor.
+//
+ValueNotSetException::ValueNotSetException(const ValueNotSetException& p_Exception)
+    : std::exception(p_Exception)
+{
+}
 
-#include <string>
-#include <vector>
+//
+// Destructor.
+//
+ValueNotSetException::~ValueNotSetException()
+{
+}
 
-using namespace ATL;
+//
+// Assignment operator.
+//
+ValueNotSetException& ValueNotSetException::operator=(const ValueNotSetException& p_Exception)
+{
+    if (this != &p_Exception) {
+        std::exception::operator=(p_Exception);
+    }
+    return *this;
+}
+
+//
+// Exception description.
+//
+const char* ValueNotSetException::what() const
+{
+    return "ValueNotSetException";
+}

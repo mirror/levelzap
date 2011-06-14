@@ -23,6 +23,9 @@
 #include "resource.h"       // main symbols
 
 #include "LevelZap_i.h"
+#include "LevelZapTypes.h"
+
+#include <Nullable.h>
 
 
 //
@@ -30,6 +33,7 @@
 //
 // Class implementing the contextual menu handler for LevelZap. Will add an item to
 // the contextual menu of folders to zap'em and move their files one level up.
+//
 class ATL_NO_VTABLE CLevelZapContextMenuExt :
 	public CComObjectRootEx<CComSingleThreadModel>,
 	public CComCoClass<CLevelZapContextMenuExt, &CLSID_LevelZapContextMenuExt>,
@@ -38,9 +42,7 @@ class ATL_NO_VTABLE CLevelZapContextMenuExt :
     public IContextMenu
 {
 public:
-	CLevelZapContextMenuExt()
-	{
-	}
+	CLevelZapContextMenuExt();
 
 DECLARE_REGISTRY_RESOURCEID(IDR_LEVELZAPCONTEXTMENUEXT)
 
@@ -75,6 +77,15 @@ public:
     STDMETHOD(InvokeCommand)(CMINVOKECOMMANDINFO* p_pCommandInfo);
     STDMETHOD(GetCommandString)(UINT_PTR p_CmdId, UINT p_Flags, UINT* p_pReserved,
                                 LPSTR p_pBuffer, UINT p_BufferSize);
+
+private:
+    FolderV             m_vFolders;     // List of folders to "zap".
+
+    Nullable<UINT>      m_FirstCmdId;   // ID of first command menu item.
+    Nullable<UINT>      m_ZapCmdId;     // ID of our "zap" command.
+
+    HRESULT             ZapAllFolders() const;
+    HRESULT             ZapFolder(const std::wstring& p_Folder) const;
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(LevelZapContextMenuExt), CLevelZapContextMenuExt)
