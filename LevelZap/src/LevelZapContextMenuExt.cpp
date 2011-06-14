@@ -337,7 +337,7 @@ HRESULT CLevelZapContextMenuExt::ZapFolder(const std::wstring& p_Folder) const
                     fileOpStruct.wFunc = FO_DELETE;
                     fileOpStruct.pFrom = randomizedFrom.c_str();
                     fileOpStruct.pTo = 0;
-                    fileOpStruct.fFlags = FOF_SILENT;
+                    fileOpStruct.fFlags = FOF_SILENT | FOF_NOCONFIRMATION;
                     if (::SHFileOperationW(&fileOpStruct) == 0) {
                         if (!fileOpStruct.fAnyOperationsAborted) {
                             // All is well.

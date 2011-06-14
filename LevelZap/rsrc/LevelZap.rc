@@ -106,7 +106,7 @@ IDR_LEVELZAP            REGISTRY                "LevelZap.rgs"
 STRINGTABLE
 BEGIN
     IDS_PROJNAME            "LevelZap"
-    IDS_ZAP_MENU_ITEM_DESCRIPTION "Move content up and &zap"
+    IDS_ZAP_MENU_ITEM_DESCRIPTION "Move content up and &Delete"
     IDS_ZAP_MENU_ITEM_HINT  "Moves the entire content of selected directory up one level and deletes the empty directory afterwards."
     IDS_MOVE_BEFORE_ZAP_DIALOG_TITLE "Moving files up one level..."
     IDS_ZAP_DIALOG_TITLE    "Zapping directory..."
