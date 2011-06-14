@@ -328,35 +328,27 @@ HRESULT CLevelZapContextMenuExt::ZapFolder(const std::wstring& p_Folder) const
             fileOpStruct.pTo = randomizedTo.c_str();
             fileOpStruct.fFlags = FOF_SILENT;
             if (::SHFileOperationW(&fileOpStruct) == 0) {
-                if (!fileOpStruct.fAnyOperationsAborted) {
-                    // We can now zap the directory itself!
-                    randomizedFrom = randomizedPath;
-                    randomizedFrom.append(L"\0", 1);
-                    assert(randomizedFrom.size() == randomizedPath.size() + 1);
-                    ::ZeroMemory(&fileOpStruct, sizeof(fileOpStruct));
-                    fileOpStruct.wFunc = FO_DELETE;
-                    fileOpStruct.pFrom = randomizedFrom.c_str();
-                    fileOpStruct.pTo = 0;
-                    fileOpStruct.fFlags = FOF_SILENT | FOF_NOCONFIRMATION;
-                    if (::SHFileOperationW(&fileOpStruct) == 0) {
-                        if (!fileOpStruct.fAnyOperationsAborted) {
-                            // All is well.
-                            hRes = S_OK;
-                        } else {
-                            // User cancelled the delete. What to do?
-                            // TODO THINK ABOUT IT
-                        }
-                    } else {
-                        // Failed to zap: what to do?
-                        // TODO THINK ABOUT IT
-                    }
+                assert(!fileOpStruct.fAnyOperationsAborted);
+
+                // We can now zap the directory itself!
+                randomizedFrom = randomizedPath;
+                randomizedFrom.append(L"\0", 1);
+                assert(randomizedFrom.size() == randomizedPath.size() + 1);
+                ::ZeroMemory(&fileOpStruct, sizeof(fileOpStruct));
+                fileOpStruct.wFunc = FO_DELETE;
+                fileOpStruct.pFrom = randomizedFrom.c_str();
+                fileOpStruct.pTo = 0;
+                fileOpStruct.fFlags = FOF_SILENT | FOF_NOCONFIRMATION;
+                if (::SHFileOperationW(&fileOpStruct) == 0) {
+                    // All is well.
+                    assert(!fileOpStruct.fAnyOperationsAborted);
+                    hRes = S_OK;
                 } else {
-                    // User cancelled at some point. What to do?
-                    // TODO THINK ABOUT IT
+                    // Failed to zap directory.
+                    hRes = E_FAIL;
                 }
             } else {
-                // Failed to move: cancel the random renaming?
-                // TODO THINK ABOUT IT
+                // Failed to move all files.
                 hRes = E_FAIL;
             }
         } else {
