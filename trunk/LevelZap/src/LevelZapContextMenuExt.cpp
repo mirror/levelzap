@@ -26,6 +26,8 @@
 #include <ArrayAutoPtr.h>
 #include <GuidString.h>
 
+#include <assert.h>
+
 
 // CLevelZapContextMenuExt
 
@@ -315,9 +317,11 @@ HRESULT CLevelZapContextMenuExt::ZapFolder(const std::wstring& p_Folder) const
         if (::MoveFileExW(p_Folder.c_str(), randomizedPath.c_str(), 0)) {
             // Move all files and folders in the randomized folder up one level. This is easier than it actually sounds...
             std::wstring randomizedFrom(randomizedPath);
-            randomizedFrom += L"\\*\0";
+            randomizedFrom.append(L"\\*\0", 3);
+            assert(randomizedFrom.size() == randomizedPath.size() + 3);
             std::wstring randomizedTo(randomizedPath, 0, lastDelim);
-            randomizedTo += L"\\\0";
+            randomizedTo.append(L"\\\0", 2);
+            assert(randomizedTo.size() == lastDelim + 2);
             SHFILEOPSTRUCTW fileOpStruct = { 0 };
             fileOpStruct.wFunc = FO_MOVE;
             fileOpStruct.pFrom = randomizedFrom.c_str();
@@ -327,7 +331,8 @@ HRESULT CLevelZapContextMenuExt::ZapFolder(const std::wstring& p_Folder) const
                 if (!fileOpStruct.fAnyOperationsAborted) {
                     // We can now zap the directory itself!
                     randomizedFrom = randomizedPath;
-                    randomizedFrom += L"\0";
+                    randomizedFrom.append(L"\0", 1);
+                    assert(randomizedFrom.size() == randomizedPath.size() + 1);
                     ::ZeroMemory(&fileOpStruct, sizeof(fileOpStruct));
                     fileOpStruct.wFunc = FO_DELETE;
                     fileOpStruct.pFrom = randomizedFrom.c_str();
