@@ -1,0 +1,25 @@
+HKCR
+{
+	NoRemove CLSID
+	{
+		ForceRemove {5F439FCB-CE37-451A-9959-051D07A94BC6} = s 'LevelZapContextMenuExt Class'
+		{
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			TypeLib = s '{3C4ECD21-AC37-4DB0-A960-FD1B7120D62D}'
+			Version = s '1.0'
+		}
+	}
+	NoRemove Folder
+	{
+		NoRemove shellex
+		{
+			ContextMenuHandlers
+			{
+				ForceRemove LevelZap = s '{5F439FCB-CE37-451A-9959-051D07A94BC6}'
+			}
+		}
+	}
+}
