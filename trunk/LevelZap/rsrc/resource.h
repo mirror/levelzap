@@ -8,7 +8,10 @@
 #define IDS_ZAP_MENU_ITEM_HINT          102
 #define IDS_MOVE_BEFORE_ZAP_DIALOG_TITLE 103
 #define IDS_ZAP_DIALOG_TITLE            104
+#define IDS_ZAP_CONFIRM_MESSAGE_1       105
 #define IDR_LEVELZAPCONTEXTMENUEXT      106
+#define IDS_ZAP_CONFIRM_MESSAGE_2       106
+#define IDS_ZAP_CONFIRM_CAPTION         107
 
 // Next default values for new objects
 // 

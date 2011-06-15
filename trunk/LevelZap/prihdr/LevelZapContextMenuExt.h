@@ -85,7 +85,8 @@ private:
     Nullable<UINT>      m_ZapCmdId;     // ID of our "zap" command.
 
     HRESULT             ZapAllFolders() const;
-    HRESULT             ZapFolder(const std::wstring& p_Folder) const;
+    HRESULT             ZapFolder(const std::wstring& p_Folder,
+                                  bool& p_rYesToAll) const;
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(LevelZapContextMenuExt), CLevelZapContextMenuExt)
