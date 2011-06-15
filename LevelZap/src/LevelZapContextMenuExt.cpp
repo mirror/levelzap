@@ -27,6 +27,7 @@
 #include <GuidString.h>
 
 #include <assert.h>
+#include <sstream>
 
 
 // CLevelZapContextMenuExt
@@ -288,9 +289,10 @@ STDMETHODIMP CLevelZapContextMenuExt::GetCommandString(
 HRESULT CLevelZapContextMenuExt::ZapAllFolders() const
 {
     HRESULT hRes = S_OK;
+    bool yesToAll = false;
     FolderV::const_iterator it, end = m_vFolders.end();
     for (it = m_vFolders.begin(); SUCCEEDED(hRes) && it != end; ++it) {
-        hRes = ZapFolder(*it);
+        hRes = ZapFolder(*it, yesToAll);
     }
     return hRes;
 }
@@ -301,59 +303,79 @@ HRESULT CLevelZapContextMenuExt::ZapAllFolders() const
 // Copies the entire content of the given directory up one level and then "zaps" the directory.
 //
 // @param p_Folder Folder path.
+// @param p_rYesToAll true if user chose to answer "Yes" to all confirmations.
 // @return Result code.
 //
-HRESULT CLevelZapContextMenuExt::ZapFolder(const std::wstring& p_Folder) const
+HRESULT CLevelZapContextMenuExt::ZapFolder(const std::wstring& p_Folder,
+                                           bool& p_rYesToAll) const
 {
     HRESULT hRes = E_UNEXPECTED;
 
-    // First rename the given folder to a random name so that the move will work
-    // if it contains another folder with the same name. (You know, like those ZIP files do.)
+    // Ask for confirmation.
     std::wstring::size_type lastDelim = p_Folder.find_last_of(L"\\/");
     if (lastDelim != std::wstring::npos) {
-        GuidString randomizedName;
-        std::wstring randomizedPath(p_Folder);
-        randomizedPath.replace(lastDelim + 1, (randomizedPath.size() - lastDelim) - 1, randomizedName.String());
-        if (::MoveFileExW(p_Folder.c_str(), randomizedPath.c_str(), 0)) {
-            // Move all files and folders in the randomized folder up one level. This is easier than it actually sounds...
-            std::wstring randomizedFrom(randomizedPath);
-            randomizedFrom.append(L"\\*\0", 3);
-            assert(randomizedFrom.size() == randomizedPath.size() + 3);
-            std::wstring randomizedTo(randomizedPath, 0, lastDelim);
-            randomizedTo.append(L"\\\0", 2);
-            assert(randomizedTo.size() == lastDelim + 2);
-            SHFILEOPSTRUCTW fileOpStruct = { 0 };
-            fileOpStruct.wFunc = FO_MOVE;
-            fileOpStruct.pFrom = randomizedFrom.c_str();
-            fileOpStruct.pTo = randomizedTo.c_str();
-            fileOpStruct.fFlags = FOF_SILENT;
-            if (::SHFileOperationW(&fileOpStruct) == 0) {
-                assert(!fileOpStruct.fAnyOperationsAborted);
-
-                // We can now zap the directory itself!
-                randomizedFrom = randomizedPath;
-                randomizedFrom.append(L"\0", 1);
-                assert(randomizedFrom.size() == randomizedPath.size() + 1);
-                ::ZeroMemory(&fileOpStruct, sizeof(fileOpStruct));
-                fileOpStruct.wFunc = FO_DELETE;
+        bool goOn = p_rYesToAll;
+        if (!goOn) {
+            std::wstring folderName(p_Folder.begin() + (lastDelim + 1), p_Folder.end());
+            CStringW confirmMsg1(MAKEINTRESOURCEW(IDS_ZAP_CONFIRM_MESSAGE_1));
+            CStringW confirmMsg2(MAKEINTRESOURCEW(IDS_ZAP_CONFIRM_MESSAGE_2));
+            std::wstringstream wss;
+            wss << (LPCWSTR) confirmMsg1 << folderName << (LPCWSTR) confirmMsg2;
+            std::wstring confirmMsgComplete = wss.str();
+            CStringW confirmCaption(MAKEINTRESOURCEW(IDS_ZAP_CONFIRM_CAPTION));
+            goOn = (::MessageBoxW(0, confirmMsgComplete.c_str(), confirmCaption,
+                                  MB_OKCANCEL | MB_ICONEXCLAMATION) == IDOK);
+        }
+        if (goOn) {
+            // First rename the given folder to a random name so that the move will work
+            // if it contains another folder with the same name. (You know, like those ZIP files do.)
+            GuidString randomizedName;
+            std::wstring randomizedPath(p_Folder);
+            randomizedPath.replace(lastDelim + 1, (randomizedPath.size() - lastDelim) - 1, randomizedName.String());
+            if (::MoveFileExW(p_Folder.c_str(), randomizedPath.c_str(), 0)) {
+                // Move all files and folders in the randomized folder up one level. This is easier than it actually sounds...
+                std::wstring randomizedFrom(randomizedPath);
+                randomizedFrom.append(L"\\*\0", 3);
+                assert(randomizedFrom.size() == randomizedPath.size() + 3);
+                std::wstring randomizedTo(randomizedPath, 0, lastDelim);
+                randomizedTo.append(L"\\\0", 2);
+                assert(randomizedTo.size() == lastDelim + 2);
+                SHFILEOPSTRUCTW fileOpStruct = { 0 };
+                fileOpStruct.wFunc = FO_MOVE;
                 fileOpStruct.pFrom = randomizedFrom.c_str();
-                fileOpStruct.pTo = 0;
-                fileOpStruct.fFlags = FOF_SILENT | FOF_NOCONFIRMATION;
+                fileOpStruct.pTo = randomizedTo.c_str();
+                fileOpStruct.fFlags = FOF_SILENT;
                 if (::SHFileOperationW(&fileOpStruct) == 0) {
-                    // All is well.
                     assert(!fileOpStruct.fAnyOperationsAborted);
-                    hRes = S_OK;
+
+                    // We can now zap the directory itself!
+                    randomizedFrom = randomizedPath;
+                    randomizedFrom.append(L"\0", 1);
+                    assert(randomizedFrom.size() == randomizedPath.size() + 1);
+                    ::ZeroMemory(&fileOpStruct, sizeof(fileOpStruct));
+                    fileOpStruct.wFunc = FO_DELETE;
+                    fileOpStruct.pFrom = randomizedFrom.c_str();
+                    fileOpStruct.pTo = 0;
+                    fileOpStruct.fFlags = FOF_SILENT | FOF_NOCONFIRMATION;
+                    if (::SHFileOperationW(&fileOpStruct) == 0) {
+                        // All is well.
+                        assert(!fileOpStruct.fAnyOperationsAborted);
+                        hRes = S_OK;
+                    } else {
+                        // Failed to zap directory.
+                        hRes = E_FAIL;
+                    }
                 } else {
-                    // Failed to zap directory.
+                    // Failed to move all files.
                     hRes = E_FAIL;
                 }
             } else {
-                // Failed to move all files.
+                // Error renaming.
                 hRes = E_FAIL;
             }
         } else {
-            // Error renaming.
-            hRes = E_FAIL;
+            // User cancelled.
+            hRes = E_ABORT;
         }
     } else {
         // Wrong path.
