@@ -1,0 +1,10 @@
+Version 1.0.1 (2011-10-07)
+--------------------------
+- Removed dependency to the VS2010 runtime DLL. This should make it more usable for people who do not have that DLL on their system.
+  It is installable via Windows Update, but not everyone has it by default apparently.
+
+
+Version 1.0 (2011-06-05)
+------------------------
+
+Initial release.
