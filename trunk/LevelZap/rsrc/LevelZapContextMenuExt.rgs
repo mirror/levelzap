@@ -23,3 +23,26 @@ HKCR
 		}
 	}
 }
+
+HKLM
+{
+	NoRemove Software
+	{
+		NoRemove Microsoft
+		{
+			NoRemove Windows
+			{
+				NoRemove CurrentVersion
+				{
+					Shell Extensions
+					{
+						Approved
+						{
+							ForceRemove {5F439FCB-CE37-451A-9959-051D07A94BC6} = s 'LevelZap Contextual Menu Handler'
+						}
+					}
+				}
+			}
+		}
+	}
+}

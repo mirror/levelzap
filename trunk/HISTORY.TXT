@@ -1,3 +1,8 @@
+Version 1.0.2 (2011-10-09)
+--------------------------
+- LevelZap will now properly appear in the "Approved" shell extensions, making it available on restricted systems.
+
+
 Version 1.0.1 (2011-10-07)
 --------------------------
 - Removed dependency to the VS2010 runtime DLL. This should make it more usable for people who do not have that DLL on their system.

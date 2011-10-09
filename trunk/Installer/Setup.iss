@@ -20,9 +20,9 @@
 ; THE SOFTWARE.
 
 #define MyAppName "LevelZap"
-#define MyAppVersion "1.0.1"
-#define MyAppFullVersion "1.0.1"
-#define MyAppVerName "LevelZap 1.0.1"
+#define MyAppVersion "1.0.2"
+#define MyAppFullVersion "1.0.2"
+#define MyAppVerName "LevelZap 1.0.2"
 #define MyAppPublisher "Charles Lechasseur"
 #define MyAppURL "http://levelzap.codeplex.com/"
 #define MyAppDescription "LevelZap Shell Contextual Menu Extension"
