@@ -66,3 +66,8 @@ Source: ..\bin\x64\Release\LevelZap.dll; DestDir: {app}; Flags: ignoreversion re
 Source: ..\LICENSE.TXT; DestDir: {app}; Flags: overwritereadonly uninsremovereadonly
 Source: ..\HISTORY.TXT; DestDir: {app}; Flags: overwritereadonly uninsremovereadonly
 Source: .\Input\LevelZap on CodePlex.url; DestDir: {app}; Flags: overwritereadonly uninsremovereadonly
+
+[Registry]
+; Delete the old association with "Folder" that was used in LevelZap 1.0.2 or less.
+; The DLL now associates with "Directory" which prevents us from trying to zap ZIP files.
+Root: HKCR; SubKey: Folder\shellex\ContextMenuHandlers\LevelZap; Flags: DeleteKey DontCreateKey;

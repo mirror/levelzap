@@ -84,8 +84,9 @@ private:
     Nullable<UINT>      m_FirstCmdId;   // ID of first command menu item.
     Nullable<UINT>      m_ZapCmdId;     // ID of our "zap" command.
 
-    HRESULT             ZapAllFolders() const;
-    HRESULT             ZapFolder(const std::wstring& p_Folder,
+    HRESULT             ZapAllFolders(const HWND p_hParentWnd) const;
+    HRESULT             ZapFolder(const HWND p_hParentWnd,
+                                  const std::wstring& p_Folder,
                                   bool& p_rYesToAll) const;
 };
 

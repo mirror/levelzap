@@ -12,7 +12,7 @@ HKCR
 			Version = s '1.0'
 		}
 	}
-	NoRemove Folder
+	NoRemove Directory
 	{
 		NoRemove shellex
 		{
