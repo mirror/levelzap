@@ -185,7 +185,7 @@ STDMETHODIMP CLevelZapContextMenuExt::InvokeCommand(
                 UINT cmdId = cmdOffset + m_FirstCmdId;
                 if (m_ZapCmdId.HasValue() && m_ZapCmdId == cmdId) {
                     // Zap everything.
-                    hRes = ZapAllFolders();
+                    hRes = ZapAllFolders((p_pCommandInfo->fMask & CMIC_MASK_FLAG_NO_UI) == 0 ? p_pCommandInfo->hwnd : 0);
                 } else {
                     // Invalid command ID.
                     hRes = E_INVALIDARG;
@@ -284,15 +284,17 @@ STDMETHODIMP CLevelZapContextMenuExt::GetCommandString(
 // Called when the contextual menu item is chosen. We scan all folders
 // we found at initialization time and "zap"'em.
 //
+// @param p_hParentWnd Handle of parent window for dialog boxes.
+//                     If this is set to 0, we will not show any UI.
 // @return Result code.
 //
-HRESULT CLevelZapContextMenuExt::ZapAllFolders() const
+HRESULT CLevelZapContextMenuExt::ZapAllFolders(const HWND p_hParentWnd) const
 {
     HRESULT hRes = S_OK;
-    bool yesToAll = false;
+    bool yesToAll = p_hParentWnd == 0;
     FolderV::const_iterator it, end = m_vFolders.end();
     for (it = m_vFolders.begin(); SUCCEEDED(hRes) && it != end; ++it) {
-        hRes = ZapFolder(*it, yesToAll);
+        hRes = ZapFolder(p_hParentWnd, *it, yesToAll);
     }
     return hRes;
 }
@@ -302,11 +304,14 @@ HRESULT CLevelZapContextMenuExt::ZapAllFolders() const
 //
 // Copies the entire content of the given directory up one level and then "zaps" the directory.
 //
+// @param p_hParentWnd Handle of parent window for dialog boxes.
+//                     If this is set to 0, we will not show any UI.
 // @param p_Folder Folder path.
 // @param p_rYesToAll true if user chose to answer "Yes" to all confirmations.
 // @return Result code.
 //
-HRESULT CLevelZapContextMenuExt::ZapFolder(const std::wstring& p_Folder,
+HRESULT CLevelZapContextMenuExt::ZapFolder(const HWND p_hParentWnd,
+                                           const std::wstring& p_Folder,
                                            bool& p_rYesToAll) const
 {
     HRESULT hRes = E_UNEXPECTED;
@@ -323,7 +328,7 @@ HRESULT CLevelZapContextMenuExt::ZapFolder(const std::wstring& p_Folder,
             wss << (LPCWSTR) confirmMsg1 << folderName << (LPCWSTR) confirmMsg2;
             std::wstring confirmMsgComplete = wss.str();
             CStringW confirmCaption(MAKEINTRESOURCEW(IDS_ZAP_CONFIRM_CAPTION));
-            goOn = (::MessageBoxW(0, confirmMsgComplete.c_str(), confirmCaption,
+            goOn = (::MessageBoxW(p_hParentWnd, confirmMsgComplete.c_str(), confirmCaption,
                                   MB_OKCANCEL | MB_ICONEXCLAMATION) == IDOK);
         }
         if (goOn) {
@@ -341,10 +346,14 @@ HRESULT CLevelZapContextMenuExt::ZapFolder(const std::wstring& p_Folder,
                 randomizedTo.append(L"\\\0", 2);
                 assert(randomizedTo.size() == lastDelim + 2);
                 SHFILEOPSTRUCTW fileOpStruct = { 0 };
+                fileOpStruct.hwnd = p_hParentWnd;
                 fileOpStruct.wFunc = FO_MOVE;
                 fileOpStruct.pFrom = randomizedFrom.c_str();
                 fileOpStruct.pTo = randomizedTo.c_str();
                 fileOpStruct.fFlags = FOF_SILENT;
+                if (p_hParentWnd == 0) {
+                    fileOpStruct.fFlags |= (FOF_NOCONFIRMATION | FOF_NOERRORUI);
+                }
                 if (::SHFileOperationW(&fileOpStruct) == 0) {
                     assert(!fileOpStruct.fAnyOperationsAborted);
 
@@ -353,10 +362,14 @@ HRESULT CLevelZapContextMenuExt::ZapFolder(const std::wstring& p_Folder,
                     randomizedFrom.append(L"\0", 1);
                     assert(randomizedFrom.size() == randomizedPath.size() + 1);
                     ::ZeroMemory(&fileOpStruct, sizeof(fileOpStruct));
+                    fileOpStruct.hwnd = p_hParentWnd;
                     fileOpStruct.wFunc = FO_DELETE;
                     fileOpStruct.pFrom = randomizedFrom.c_str();
                     fileOpStruct.pTo = 0;
                     fileOpStruct.fFlags = FOF_SILENT | FOF_NOCONFIRMATION;
+                    if (p_hParentWnd == 0) {
+                        fileOpStruct.fFlags |= FOF_NOERRORUI;
+                    }
                     if (::SHFileOperationW(&fileOpStruct) == 0) {
                         // All is well.
                         assert(!fileOpStruct.fAnyOperationsAborted);
