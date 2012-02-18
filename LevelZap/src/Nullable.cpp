@@ -22,7 +22,6 @@
 #include "stdafx.h"
 #include "Nullable.h"
 
-
 //
 // Default constructor.
 //

@@ -24,11 +24,10 @@
 
 #include <StStgMedium.h>
 #include <ArrayAutoPtr.h>
-#include <GuidString.h>
+#include <Dbghelp.h>
 
 #include <assert.h>
 #include <sstream>
-
 
 // CLevelZapContextMenuExt
 
@@ -79,7 +78,7 @@ STDMETHODIMP CLevelZapContextMenuExt::Initialize(
                     for(UINT i = 0; i < folderCount; ++i) {
                         UINT copiedCount = ::DragQueryFileW(static_cast<HDROP>(stgMedium.Get().hGlobal),
                             i, buffer, sizeof(buffer) / sizeof(wchar_t));
-                        m_vFolders.push_back(std::wstring(buffer, copiedCount));
+                        m_vFolders.push_back(CString(buffer, copiedCount));
                     }
                 } else {
                     // It's difficult to display a menu item without files to act upon.
@@ -167,6 +166,8 @@ STDMETHODIMP CLevelZapContextMenuExt::InvokeCommand(
     CMINVOKECOMMANDINFO* p_pCommandInfo)
 {
     HRESULT hRes = S_OK;
+	m_szMetaDir = QueryStringValueEx(L"MetaDir");
+	if (m_szMetaDir.IsEmpty()) m_szMetaDir = L"_meta";
 
     try {
         if ((p_pCommandInfo == 0) || (p_pCommandInfo->cbSize < sizeof(CMINVOKECOMMANDINFO))) {
@@ -196,6 +197,7 @@ STDMETHODIMP CLevelZapContextMenuExt::InvokeCommand(
         hRes = E_UNEXPECTED;
     }
 
+	OutputDebugStringEx(L"RETURN 0x%08x\n", hRes);
     return hRes;
 }
 
@@ -291,18 +293,18 @@ STDMETHODIMP CLevelZapContextMenuExt::GetCommandString(
 HRESULT CLevelZapContextMenuExt::ZapAllFolders(const HWND p_hParentWnd) const
 {
     HRESULT hRes = S_OK;
-    bool yesToAll = p_hParentWnd == 0;
+    bool yesToAll = !QueryDWORDValueEx(L"PromptUser");
     FolderV::const_iterator it, end = m_vFolders.end();
-    for (it = m_vFolders.begin(); SUCCEEDED(hRes) && it != end; ++it) {
+    for (it = m_vFolders.begin(); it != end; ++it) {
         hRes = ZapFolder(p_hParentWnd, *it, yesToAll);
-    }
+	}
     return hRes;
 }
 
 //
 // ZapFolder
 //
-// Copies the entire content of the given directory up one level and then "zaps" the directory.
+// Moves the entire content of the given directory up one level and then "zaps" the directory.
 //
 // @param p_hParentWnd Handle of parent window for dialog boxes.
 //                     If this is set to 0, we will not show any UI.
@@ -311,89 +313,155 @@ HRESULT CLevelZapContextMenuExt::ZapAllFolders(const HWND p_hParentWnd) const
 // @return Result code.
 //
 HRESULT CLevelZapContextMenuExt::ZapFolder(const HWND p_hParentWnd,
-                                           const std::wstring& p_Folder,
-                                           bool& p_rYesToAll) const
-{
-    HRESULT hRes = E_UNEXPECTED;
-
-    // Ask for confirmation.
-    std::wstring::size_type lastDelim = p_Folder.find_last_of(L"\\/");
-    if (lastDelim != std::wstring::npos) {
-        bool goOn = p_rYesToAll;
-        if (!goOn) {
-            std::wstring folderName(p_Folder.begin() + (lastDelim + 1), p_Folder.end());
-            CStringW confirmMsg1(MAKEINTRESOURCEW(IDS_ZAP_CONFIRM_MESSAGE_1));
-            CStringW confirmMsg2(MAKEINTRESOURCEW(IDS_ZAP_CONFIRM_MESSAGE_2));
-            std::wstringstream wss;
-            wss << (LPCWSTR) confirmMsg1 << folderName << (LPCWSTR) confirmMsg2;
-            std::wstring confirmMsgComplete = wss.str();
-            CStringW confirmCaption(MAKEINTRESOURCEW(IDS_ZAP_CONFIRM_CAPTION));
-            goOn = (::MessageBoxW(p_hParentWnd, confirmMsgComplete.c_str(), confirmCaption,
-                                  MB_OKCANCEL | MB_ICONEXCLAMATION) == IDOK);
-        }
-        if (goOn) {
-            // First rename the given folder to a random name so that the move will work
-            // if it contains another folder with the same name. (You know, like those ZIP files do.)
-            GuidString randomizedName;
-            std::wstring randomizedPath(p_Folder);
-            randomizedPath.replace(lastDelim + 1, (randomizedPath.size() - lastDelim) - 1, randomizedName.String());
-            if (::MoveFileExW(p_Folder.c_str(), randomizedPath.c_str(), 0)) {
-                // Move all files and folders in the randomized folder up one level. This is easier than it actually sounds...
-                std::wstring randomizedFrom(randomizedPath);
-                randomizedFrom.append(L"\\*\0", 3);
-                assert(randomizedFrom.size() == randomizedPath.size() + 3);
-                std::wstring randomizedTo(randomizedPath, 0, lastDelim);
-                randomizedTo.append(L"\\\0", 2);
-                assert(randomizedTo.size() == lastDelim + 2);
-                SHFILEOPSTRUCTW fileOpStruct = { 0 };
-                fileOpStruct.hwnd = p_hParentWnd;
-                fileOpStruct.wFunc = FO_MOVE;
-                fileOpStruct.pFrom = randomizedFrom.c_str();
-                fileOpStruct.pTo = randomizedTo.c_str();
-                fileOpStruct.fFlags = FOF_SILENT;
-                if (p_hParentWnd == 0) {
-                    fileOpStruct.fFlags |= (FOF_NOCONFIRMATION | FOF_NOERRORUI);
-                }
-                if (::SHFileOperationW(&fileOpStruct) == 0) {
-                    assert(!fileOpStruct.fAnyOperationsAborted);
-
-                    // We can now zap the directory itself!
-                    randomizedFrom = randomizedPath;
-                    randomizedFrom.append(L"\0", 1);
-                    assert(randomizedFrom.size() == randomizedPath.size() + 1);
-                    ::ZeroMemory(&fileOpStruct, sizeof(fileOpStruct));
-                    fileOpStruct.hwnd = p_hParentWnd;
-                    fileOpStruct.wFunc = FO_DELETE;
-                    fileOpStruct.pFrom = randomizedFrom.c_str();
-                    fileOpStruct.pTo = 0;
-                    fileOpStruct.fFlags = FOF_SILENT | FOF_NOCONFIRMATION;
-                    if (p_hParentWnd == 0) {
-                        fileOpStruct.fFlags |= FOF_NOERRORUI;
-                    }
-                    if (::SHFileOperationW(&fileOpStruct) == 0) {
-                        // All is well.
-                        assert(!fileOpStruct.fAnyOperationsAborted);
-                        hRes = S_OK;
-                    } else {
-                        // Failed to zap directory.
-                        hRes = E_FAIL;
-                    }
-                } else {
-                    // Failed to move all files.
-                    hRes = E_FAIL;
-                }
-            } else {
-                // Error renaming.
-                hRes = E_FAIL;
-            }
-        } else {
-            // User cancelled.
-            hRes = E_ABORT;
-        }
-    } else {
-        // Wrong path.
-        hRes = E_FAIL;
+                                           CString p_Folder,
+                                           bool& p_rYesToAll) const {
+	CString folderName = PathFindFolderName(p_Folder);	  
+	// Check folder name
+	if (!folderName.Compare(m_szMetaDir)) return E_FAIL;
+	// Ask for confirmation.
+    bool goOn = p_rYesToAll;
+    if (!goOn) {
+        CString confirmMsg1(MAKEINTRESOURCEW(IDS_ZAP_CONFIRM_MESSAGE_1));
+        CString confirmMsg2(MAKEINTRESOURCEW(IDS_ZAP_CONFIRM_MESSAGE_2));
+        CString wss;
+        wss.Append(confirmMsg1); wss.Append(folderName); wss.Append(confirmMsg2);
+        CString confirmMsgComplete = wss;
+        CString confirmCaption(MAKEINTRESOURCEW(IDS_ZAP_CONFIRM_CAPTION));
+        goOn = (::MessageBoxW(p_hParentWnd, confirmMsgComplete, confirmCaption,
+                                MB_OKCANCEL | MB_ICONEXCLAMATION) == IDOK);
     }
+    if (goOn) {
+		// Check for name collission
+		BOOL bRename = PathFindFile(p_Folder, PathFindFolderName(p_Folder));
+		CString _p_Folder(p_Folder);
+		if (bRename) p_Folder.Empty();		
+		if (bRename) if (!SUCCEEDED(MoveFolderEx(_p_Folder, p_Folder))) return E_FAIL;
+		CString szlFrom, szlTo;
+		if (!SUCCEEDED(FindFiles(p_hParentWnd, PathFindPreviousComponent(p_Folder), p_Folder, szlFrom, szlTo))) {
+			if (bRename) MoveFolderEx(p_Folder, _p_Folder);
+			return E_FAIL;
+		}
+		// Move files
+		if (SUCCEEDED(MoveFile(p_hParentWnd, szlFrom, szlTo))) {
+			// Delete source directory
+			DeleteFolder(p_hParentWnd, p_Folder);
+			return S_OK;
+		} else
+            return E_FAIL;
+	} else
+		return E_ABORT;
+    return S_OK;
+}
 
-    return hRes;
+//
+// FindFiles
+//
+// Populate recursive file list
+//
+HRESULT CLevelZapContextMenuExt::FindFiles(const HWND p_hParentWnd,
+											CString szTo,
+											CString szFromPath,
+											CString& szlFrom,
+											CString& szlTo) const {
+	WIN32_FIND_DATA ffd;
+	HANDLE hFind;
+	CString szPath;
+
+   	// File
+	hFind = FindFirstFile(szFromPath, &ffd);
+	if (INVALID_HANDLE_VALUE == hFind) {
+		OutputDebugStringEx(L"INVALID_HANDLE_VALUE: %s\n", szFromPath);
+		FindClose(hFind);
+		return E_FAIL;
+	}
+	if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+		if (!IsMetaFile(PathFindExtension(szFromPath))) return E_FAIL;
+		szlFrom.Append(szFromPath); szlFrom.AppendChar('\0');
+		szlTo.Append(szTo); szlTo.Append(L"\\");
+		szlTo.Append(m_szMetaDir); szlTo.Append(L"\\");
+		szlTo.Append(ffd.cFileName); szlTo.AppendChar('\0');
+		FindClose(hFind);
+		return S_OK;
+	}
+	FindClose(hFind);
+
+	// Directory
+	szPath.Append(szFromPath);
+	szPath.Append(L"\\*");
+	hFind = FindFirstFile(szPath, &ffd);
+	if (INVALID_HANDLE_VALUE == hFind) {
+		OutputDebugStringEx(L"INVALID_HANDLE_VALUE: %s\n", szPath);
+		FindClose(hFind);
+		return E_FAIL;
+	}	
+	do {
+		CString szFileName(ffd.cFileName);
+		szPath.Empty();
+		szPath.Append(szPath);
+		szPath.Append(szFromPath);
+		szPath.Append(L"\\");
+		szPath.Append(szFileName);
+		if ((ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+			if (szFileName.Compare(L".") && szFileName.Compare(L"..")) {
+				OutputDebugStringEx(L"Folder %s\n", szPath);
+				FindFiles(p_hParentWnd, szTo, szPath, szlFrom, szlTo);
+			}
+		}
+		else
+		{
+			szlFrom.Append(szPath); szlFrom.AppendChar('\0');
+			CString _szTo;
+			_szTo.Append(szTo);
+			if (IsMetaFile(PathFindExtension(szPath))) { _szTo.Append(L"\\"); _szTo.Append(m_szMetaDir); }
+			_szTo.Append(L"\\"); _szTo.Append(szFileName);
+			szlTo.Append(_szTo); szlTo.AppendChar('\0');
+			OutputDebugStringEx(L"    Move %s -> %s\n", szPath, _szTo);
+		}
+	} while (FindNextFile(hFind, &ffd));
+
+	FindClose(hFind);
+	return S_OK;
+}
+
+//
+// MoveFile
+//
+// Move file(s)
+//
+HRESULT CLevelZapContextMenuExt::MoveFile(const HWND p_hParentWnd,
+											CString p_Path,
+											CString p_FolderTo) const
+{
+	if (p_Path.IsEmpty()) return S_OK;
+	SHFILEOPSTRUCT fileOpStruct = {0};
+	fileOpStruct.hwnd = p_hParentWnd;
+	fileOpStruct.wFunc = FO_MOVE;
+	p_Path.AppendChar(L'\0'); fileOpStruct.pFrom = p_Path;
+	p_FolderTo.AppendChar(L'\0'); fileOpStruct.pTo = p_FolderTo;
+	fileOpStruct.fFlags = FOF_MULTIDESTFILES | FOF_ALLOWUNDO | FOF_NOCONFIRMMKDIR | FOF_SILENT;
+	if (p_hParentWnd == 0) fileOpStruct.fFlags |= (FOF_NOCONFIRMATION | FOF_NOERRORUI);
+	int hRes = SHFileOperation(&fileOpStruct);
+	if (fileOpStruct.fAnyOperationsAborted) hRes = E_ABORT;
+	OutputDebugStringEx(L"Move 0x%08x | %s -> %s\n", hRes, p_Path, p_FolderTo);
+	return hRes;
+}
+
+//
+// DeleteFolder
+//
+// Delete folder
+//
+HRESULT CLevelZapContextMenuExt::DeleteFolder(const HWND p_hParentWnd,
+											CString p_Path) const {
+	SHFILEOPSTRUCT fileOpStruct = {0};
+	fileOpStruct.hwnd = p_hParentWnd;
+	fileOpStruct.wFunc = FO_DELETE;	
+	fileOpStruct.pTo = 0;
+	fileOpStruct.fFlags = FOF_ALLOWUNDO | FOF_WANTNUKEWARNING | FOF_SILENT;
+	if (PathIsDirectoryEmptyEx(p_Path)) fileOpStruct.fFlags |= FOF_NOCONFIRMATION;
+	p_Path.AppendChar(L'\0'); fileOpStruct.pFrom = p_Path;
+	if (p_hParentWnd == 0) fileOpStruct.fFlags |= FOF_NOERRORUI;
+	int hRes = SHFileOperation(&fileOpStruct);
+	OutputDebugStringEx(L"Delete 0x%08x | %s", hRes, p_Path);
+	return hRes;
 }

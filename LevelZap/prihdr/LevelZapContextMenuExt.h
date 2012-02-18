@@ -27,7 +27,6 @@
 
 #include <Nullable.h>
 
-
 //
 // CLevelZapContextMenuExt
 //
@@ -54,8 +53,6 @@ BEGIN_COM_MAP(CLevelZapContextMenuExt)
     COM_INTERFACE_ENTRY(IContextMenu)
 END_COM_MAP()
 
-
-
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
 	HRESULT FinalConstruct()
@@ -80,14 +77,25 @@ public:
 
 private:
     FolderV             m_vFolders;     // List of folders to "zap".
+	HRESULT				FindFiles(const HWND p_hParentWnd,
+									CString szTo,
+									CString szFromPath,
+									CString& szlFrom,
+									CString& szlTo) const;
 
     Nullable<UINT>      m_FirstCmdId;   // ID of first command menu item.
     Nullable<UINT>      m_ZapCmdId;     // ID of our "zap" command.
 
     HRESULT             ZapAllFolders(const HWND p_hParentWnd) const;
     HRESULT             ZapFolder(const HWND p_hParentWnd,
-                                  const std::wstring& p_Folder,
+                                  CString p_Folder,
                                   bool& p_rYesToAll) const;
+	HRESULT				MoveFile(const HWND p_hParentWnd,
+											CString p_Path,
+											CString p_FolderTo) const;
+	HRESULT				DeleteFolder(const HWND p_hParentWnd,
+											CString p_Path) const;
+	CString				m_szMetaDir;
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(LevelZapContextMenuExt), CLevelZapContextMenuExt)
