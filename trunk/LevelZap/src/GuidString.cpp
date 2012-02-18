@@ -22,7 +22,6 @@
 #include "stdafx.h"
 #include "GuidString.h"
 
-
 //
 // Default constructor. Creates a random string.
 //

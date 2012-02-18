@@ -24,7 +24,6 @@
 #include <objidl.h>
 #include <ole2.h>
 
-
 //
 // StStgMedium
 //

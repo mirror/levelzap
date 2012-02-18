@@ -33,19 +33,18 @@
 
 #define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// some CString constructors will be explicit
 
-
 #define ATL_NO_ASSERT_ON_DESTROY_NONEXISTENT_WINDOW
 
 #include "resource.h"
 #include <atlbase.h>
+#include <atlcoll.h>
 #include <atlcom.h>
 #include <atlctl.h>
 #include <atlstr.h>
-#include <shlobj.h>
-#include <shobjidl.h>
+#include <ShlObj.h>
+#include <ShObjIdl.h>
 #include <windows.h>
-
-#include <string>
 #include <vector>
+#include <algorithm>
 
 using namespace ATL;

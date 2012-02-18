@@ -87,6 +87,7 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>..\obj\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <PreLinkEventUseInBuild>false</PreLinkEventUseInBuild>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -239,6 +240,19 @@
     <PostBuildEvent>
       <Message>Registering output (x64)...</Message>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
+    <PreLinkEvent />
+    <PreLinkEvent>
+      <Command>del "$(TargetPath)" /q
+if exist "$(TargetPath)" (
+taskkill /f /IM explorer.exe
+start %WinDir%\explorer.exe
+)</Command>
+      <Message>Restarting explorer.exe...</Message>
+    </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include=".\src\dllmain.cpp">
