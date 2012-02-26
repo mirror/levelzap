@@ -166,6 +166,7 @@ STDMETHODIMP CLevelZapContextMenuExt::InvokeCommand(
     CMINVOKECOMMANDINFO* p_pCommandInfo)
 {
     HRESULT hRes = S_OK;
+	m_dwLevels = QueryDWORDValueEx(L"Levels");
 	m_szMetaDir = QueryStringValueEx(L"MetaDir");
 	if (m_szMetaDir.IsEmpty()) m_szMetaDir = L"_meta";
 
@@ -336,8 +337,8 @@ HRESULT CLevelZapContextMenuExt::ZapFolder(const HWND p_hParentWnd,
 		CString _p_Folder(p_Folder);
 		if (bRename) p_Folder.Empty();		
 		if (bRename) if (!SUCCEEDED(MoveFolderEx(_p_Folder, p_Folder))) return E_FAIL;
-		CString szlFrom, szlTo;
-		if (!SUCCEEDED(FindFiles(p_hParentWnd, PathFindPreviousComponent(p_Folder), p_Folder, szlFrom, szlTo))) {
+		CString szlFrom, szlTo; DWORD dwlevel = 0;
+		if (!SUCCEEDED(FindFiles(p_hParentWnd, PathFindPreviousComponent(p_Folder), p_Folder, dwlevel, szlFrom, szlTo))) {
 			if (bRename) MoveFolderEx(p_Folder, _p_Folder);
 			return E_FAIL;
 		}
@@ -361,6 +362,7 @@ HRESULT CLevelZapContextMenuExt::ZapFolder(const HWND p_hParentWnd,
 HRESULT CLevelZapContextMenuExt::FindFiles(const HWND p_hParentWnd,
 											CString szTo,
 											CString szFromPath,
+											DWORD& dwLevel,
 											CString& szlFrom,
 											CString& szlTo) const {
 	WIN32_FIND_DATA ffd;
@@ -403,8 +405,15 @@ HRESULT CLevelZapContextMenuExt::FindFiles(const HWND p_hParentWnd,
 		szPath.Append(szFileName);
 		if ((ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
 			if (szFileName.Compare(L".") && szFileName.Compare(L"..")) {
-				OutputDebugStringEx(L"Folder %s\n", szPath);
-				FindFiles(p_hParentWnd, szTo, szPath, szlFrom, szlTo);
+				if (!m_dwLevels || dwLevel+1 < m_dwLevels) {
+					OutputDebugStringEx(L"Folder %s\n", szPath);
+					dwLevel++;
+					FindFiles(p_hParentWnd, szTo, szPath, dwLevel, szlFrom, szlTo);					
+				} else {
+					szlFrom.Append(szPath); szlFrom.AppendChar('\0');
+					szlTo.Append(szTo + L"\\" + szFileName); szlTo.AppendChar('\0');
+					OutputDebugStringEx(L"    Move | Level %u | %s -> %s\n", dwLevel, szPath, szTo + L"\\" + szFileName);
+				}
 			}
 		}
 		else
@@ -415,7 +424,7 @@ HRESULT CLevelZapContextMenuExt::FindFiles(const HWND p_hParentWnd,
 			if (IsMetaFile(PathFindExtension(szPath))) { _szTo.Append(L"\\"); _szTo.Append(m_szMetaDir); }
 			_szTo.Append(L"\\"); _szTo.Append(szFileName);
 			szlTo.Append(_szTo); szlTo.AppendChar('\0');
-			OutputDebugStringEx(L"    Move %s -> %s\n", szPath, _szTo);
+			OutputDebugStringEx(L"    Move | Level %u | %s -> %s\n", dwLevel, szPath, _szTo);
 		}
 	} while (FindNextFile(hFind, &ffd));
 
