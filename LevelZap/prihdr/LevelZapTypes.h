@@ -23,14 +23,3 @@
 
 // Vector of folder paths
 typedef std::vector<CString> FolderV;
-
-void OutputDebugStringEx(const wchar_t* format, ...);
-CString PathFindFolderName(CString szPath);
-CString PathFindPreviousComponent(CString szPath);
-HRESULT MoveFolderEx(CString& szFrom, CString& szTo);
-BOOL PathFindFile(CString _szPath, CString _szFile);
-BOOL PathIsDirectoryEmptyEx(CString _szPath);
-BOOL IsMetaFile(CString fileEnding);
-DWORD QueryDWORDValueEx(CString szValue);
-CString QueryStringValueEx(CString szValue);
-LONG QueryMultiStringValueEx(CString szValue, CAtlList<CString>& szArr);

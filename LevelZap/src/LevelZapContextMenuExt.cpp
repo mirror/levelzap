@@ -25,6 +25,7 @@
 #include <StStgMedium.h>
 #include <ArrayAutoPtr.h>
 #include <Dbghelp.h>
+#include <Utilities.h>
 
 #include <assert.h>
 #include <sstream>
@@ -166,8 +167,8 @@ STDMETHODIMP CLevelZapContextMenuExt::InvokeCommand(
     CMINVOKECOMMANDINFO* p_pCommandInfo)
 {
     HRESULT hRes = S_OK;
-	m_dwLevels = QueryDWORDValueEx(L"Levels");
-	m_szMetaDir = QueryStringValueEx(L"MetaDir");
+	m_dwLevels = Util::QueryDWORDValueEx(L"Levels");
+	m_szMetaDir = Util::QueryStringValueEx(L"MetaDir");
 	if (m_szMetaDir.IsEmpty()) m_szMetaDir = L"_meta";
 
     try {
@@ -198,7 +199,7 @@ STDMETHODIMP CLevelZapContextMenuExt::InvokeCommand(
         hRes = E_UNEXPECTED;
     }
 
-	OutputDebugStringEx(L"RETURN 0x%08x\n", hRes);
+	Util::OutputDebugStringEx(L"RETURN 0x%08x\n", hRes);
     return hRes;
 }
 
@@ -294,7 +295,7 @@ STDMETHODIMP CLevelZapContextMenuExt::GetCommandString(
 HRESULT CLevelZapContextMenuExt::ZapAllFolders(const HWND p_hParentWnd) const
 {
     HRESULT hRes = S_OK;
-    bool yesToAll = !QueryDWORDValueEx(L"PromptUser");
+    bool yesToAll = !Util::QueryDWORDValueEx(L"PromptUser");
     FolderV::const_iterator it, end = m_vFolders.end();
     for (it = m_vFolders.begin(); it != end; ++it) {
         hRes = ZapFolder(p_hParentWnd, *it, yesToAll);
@@ -316,7 +317,7 @@ HRESULT CLevelZapContextMenuExt::ZapAllFolders(const HWND p_hParentWnd) const
 HRESULT CLevelZapContextMenuExt::ZapFolder(const HWND p_hParentWnd,
                                            CString p_Folder,
                                            bool& p_rYesToAll) const {
-	CString folderName = PathFindFolderName(p_Folder);	  
+	CString folderName = Util::PathFindFolderName(p_Folder);	  
 	// Check folder name
 	if (!folderName.Compare(m_szMetaDir)) return E_FAIL;
 	// Ask for confirmation.
@@ -333,13 +334,13 @@ HRESULT CLevelZapContextMenuExt::ZapFolder(const HWND p_hParentWnd,
     }
     if (goOn) {
 		// Check for name collission
-		BOOL bRename = PathFindFile(p_Folder, PathFindFolderName(p_Folder));
+		BOOL bRename = Util::PathFindFile(p_Folder, Util::PathFindFolderName(p_Folder));
 		CString _p_Folder(p_Folder);
 		if (bRename) p_Folder.Empty();		
-		if (bRename) if (!SUCCEEDED(MoveFolderEx(_p_Folder, p_Folder))) return E_FAIL;
+		if (bRename) if (!SUCCEEDED(Util::MoveFolderEx(_p_Folder, p_Folder))) return E_FAIL;
 		CString szlFrom, szlTo; DWORD dwlevel = 0;
-		if (!SUCCEEDED(FindFiles(p_hParentWnd, PathFindPreviousComponent(p_Folder), p_Folder, dwlevel, szlFrom, szlTo))) {
-			if (bRename) MoveFolderEx(p_Folder, _p_Folder);
+		if (!SUCCEEDED(FindFiles(p_hParentWnd, Util::PathFindPreviousComponent(p_Folder), p_Folder, dwlevel, szlFrom, szlTo))) {
+			if (bRename) Util::MoveFolderEx(p_Folder, _p_Folder);
 			return E_FAIL;
 		}
 		// Move files
@@ -372,12 +373,12 @@ HRESULT CLevelZapContextMenuExt::FindFiles(const HWND p_hParentWnd,
    	// File
 	hFind = FindFirstFile(szFromPath, &ffd);
 	if (INVALID_HANDLE_VALUE == hFind) {
-		OutputDebugStringEx(L"INVALID_HANDLE_VALUE: %s\n", szFromPath);
+		Util::OutputDebugStringEx(L"INVALID_HANDLE_VALUE: %s\n", szFromPath);
 		FindClose(hFind);
 		return E_FAIL;
 	}
 	if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-		if (!IsMetaFile(PathFindExtension(szFromPath))) return E_FAIL;
+		if (!Util::IsMetaFile(PathFindExtension(szFromPath))) return E_FAIL;
 		szlFrom.Append(szFromPath); szlFrom.AppendChar('\0');
 		szlTo.Append(szTo); szlTo.Append(L"\\");
 		szlTo.Append(m_szMetaDir); szlTo.Append(L"\\");
@@ -392,7 +393,7 @@ HRESULT CLevelZapContextMenuExt::FindFiles(const HWND p_hParentWnd,
 	szPath.Append(L"\\*");
 	hFind = FindFirstFile(szPath, &ffd);
 	if (INVALID_HANDLE_VALUE == hFind) {
-		OutputDebugStringEx(L"INVALID_HANDLE_VALUE: %s\n", szPath);
+		Util::OutputDebugStringEx(L"INVALID_HANDLE_VALUE: %s\n", szPath);
 		FindClose(hFind);
 		return E_FAIL;
 	}	
@@ -406,13 +407,13 @@ HRESULT CLevelZapContextMenuExt::FindFiles(const HWND p_hParentWnd,
 		if ((ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
 			if (szFileName.Compare(L".") && szFileName.Compare(L"..")) {
 				if (!m_dwLevels || dwLevel+1 < m_dwLevels) {
-					OutputDebugStringEx(L"Folder %s\n", szPath);
+					Util::OutputDebugStringEx(L"Folder %s\n", szPath);
 					dwLevel++;
 					FindFiles(p_hParentWnd, szTo, szPath, dwLevel, szlFrom, szlTo);					
 				} else {
 					szlFrom.Append(szPath); szlFrom.AppendChar('\0');
 					szlTo.Append(szTo + L"\\" + szFileName); szlTo.AppendChar('\0');
-					OutputDebugStringEx(L"    Move | Level %u | %s -> %s\n", dwLevel, szPath, szTo + L"\\" + szFileName);
+					Util::OutputDebugStringEx(L"    Move | Level %u | %s -> %s\n", dwLevel, szPath, szTo + L"\\" + szFileName);
 				}
 			}
 		}
@@ -421,10 +422,10 @@ HRESULT CLevelZapContextMenuExt::FindFiles(const HWND p_hParentWnd,
 			szlFrom.Append(szPath); szlFrom.AppendChar('\0');
 			CString _szTo;
 			_szTo.Append(szTo);
-			if (IsMetaFile(PathFindExtension(szPath))) { _szTo.Append(L"\\"); _szTo.Append(m_szMetaDir); }
+			if (Util::IsMetaFile(PathFindExtension(szPath))) { _szTo.Append(L"\\"); _szTo.Append(m_szMetaDir); }
 			_szTo.Append(L"\\"); _szTo.Append(szFileName);
 			szlTo.Append(_szTo); szlTo.AppendChar('\0');
-			OutputDebugStringEx(L"    Move | Level %u | %s -> %s\n", dwLevel, szPath, _szTo);
+			Util::OutputDebugStringEx(L"    Move | Level %u | %s -> %s\n", dwLevel, szPath, _szTo);
 		}
 	} while (FindNextFile(hFind, &ffd));
 
@@ -451,7 +452,7 @@ HRESULT CLevelZapContextMenuExt::MoveFile(const HWND p_hParentWnd,
 	if (p_hParentWnd == 0) fileOpStruct.fFlags |= (FOF_NOCONFIRMATION | FOF_NOERRORUI);
 	int hRes = SHFileOperation(&fileOpStruct);
 	if (fileOpStruct.fAnyOperationsAborted) hRes = E_ABORT;
-	OutputDebugStringEx(L"Move 0x%08x | %s -> %s\n", hRes, p_Path, p_FolderTo);
+	Util::OutputDebugStringEx(L"Move 0x%08x | %s -> %s\n", hRes, p_Path, p_FolderTo);
 	return hRes;
 }
 
@@ -467,10 +468,10 @@ HRESULT CLevelZapContextMenuExt::DeleteFolder(const HWND p_hParentWnd,
 	fileOpStruct.wFunc = FO_DELETE;	
 	fileOpStruct.pTo = 0;
 	fileOpStruct.fFlags = FOF_ALLOWUNDO | FOF_WANTNUKEWARNING | FOF_SILENT;
-	if (PathIsDirectoryEmptyEx(p_Path)) fileOpStruct.fFlags |= FOF_NOCONFIRMATION;
+	if (Util::PathIsDirectoryEmptyEx(p_Path)) fileOpStruct.fFlags |= FOF_NOCONFIRMATION;
 	p_Path.AppendChar(L'\0'); fileOpStruct.pFrom = p_Path;
 	if (p_hParentWnd == 0) fileOpStruct.fFlags |= FOF_NOERRORUI;
 	int hRes = SHFileOperation(&fileOpStruct);
-	OutputDebugStringEx(L"Delete 0x%08x | %s", hRes, p_Path);
+	Util::OutputDebugStringEx(L"Delete 0x%08x | %s", hRes, p_Path);
 	return hRes;
 }
