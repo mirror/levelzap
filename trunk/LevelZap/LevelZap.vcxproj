@@ -307,6 +307,7 @@ start %WinDir%\explorer.exe
     </ClCompile>
     <ClCompile Include="src\GuidString.cpp" />
     <ClCompile Include="src\Nullable.cpp" />
+    <ClCompile Include="src\Utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include=".\prihdr\dllmain.h" />
@@ -321,6 +322,7 @@ start %WinDir%\explorer.exe
     <ClInclude Include="prihdr\LevelZapTypes.h" />
     <ClInclude Include="prihdr\Nullable.h" />
     <ClInclude Include="prihdr\StStgMedium.h" />
+    <ClInclude Include="prihdr\Utilities.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include=".\rsrc\LevelZap.rc" />
