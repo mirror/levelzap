@@ -132,7 +132,7 @@ CString PathFindPreviousComponent(CString szPath) {
 HRESULT MoveFolderEx(CString& szFrom, CString& szTo) {
 	if (szTo.IsEmpty()) {
 		GuidString szGUID;
-		szTo = PathFindPreviousComponent(szFrom) + L"\\" + CString(szGUID.String().c_str());
+		szTo = PathFindPreviousComponent(szFrom) + L"\\" + PathFindFolderName(szFrom) + CString(szGUID.String().c_str());
 	}
 	if (!(GetFileAttributes(szFrom) & FILE_ATTRIBUTE_DIRECTORY)) {
 		szTo = szFrom;
@@ -160,15 +160,19 @@ BOOL PathFindFile(CString _szPath, CString _szFile) {
 		CString szFileName(ffd.cFileName);
 		if ((ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
 			if (szFileName.Compare(L".") && szFileName.Compare(L"..")) {
-				if(PathFindFile(_szPath + L"\\" + szFileName, _szFile)) { FindClose(hFind); return true; }
+				if (!szFileName.CompareNoCase(_szFile)) goto ret;	
+				if (PathFindFile(_szPath + L"\\" + szFileName, _szFile)) goto ret;
 			}			
 		} else {
-			if (!szFileName.CompareNoCase(_szFile) && !IsMetaFile(PathFindExtension(szFileName))) { FindClose(hFind); return true; }			
+			if (!szFileName.CompareNoCase(_szFile) && !IsMetaFile(PathFindExtension(szFileName))) goto ret;			
 		}
 	} while (FindNextFile(hFind, &ffd));
 
 	FindClose(hFind);
 	return false;
+ret:
+	FindClose(hFind);
+	return true;
 }
 
 // Is directory empty
@@ -197,13 +201,14 @@ BOOL PathIsDirectoryEmptyEx(CString _szPath) {
 
 // Indentify files by file ending
 BOOL IsMetaFile(CString fileEnding) {
-	if (fileEnding.IsEmpty()) return true;
 	CAtlList<CString> sl;
 	QueryMultiStringValueEx(L"metaFiles", sl);
 	fileEnding = fileEnding.MakeLower().Right(fileEnding.GetLength()-1);
 	POSITION pos = sl.GetHeadPosition();
 	while(pos) {
-		if (!sl.GetNext(pos).Compare(fileEnding)) return true;
+		CString s = sl.GetNext(pos);
+		if (fileEnding.IsEmpty() && !s.Compare(L"*")) return true;
+		if (!s.Compare(fileEnding)) return true;
 	}
 	return false;
 }

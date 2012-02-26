@@ -73,5 +73,6 @@ Source: .\Input\LevelZap on CodePlex.url; DestDir: {app}; Flags: overwritereadon
 Root: HKCR; SubKey: Folder\shellex\ContextMenuHandlers\LevelZap; Flags: DeleteKey DontCreateKey;
 Root: HKCU; SubKey: Software\LevelZap; Flags: uninsdeletekey;
 Root: HKCU; SubKey: Software\LevelZap; ValueType: string; ValueName: "MetaDir"; ValueData: "_meta"; Flags: uninsdeletevalue createvalueifdoesntexist;
-Root: HKCU; SubKey: Software\LevelZap; ValueType: multisz; ValueName: "MetaFiles"; ValueData: "jpg{break}jpeg{break}png{break}gif{break}svg{break}bmp{break}nfo{break}diz{break}txt{break}ini{break}htm{break}html{break}url{break}pdf{break}dat{break}db{break}lnk"; Flags: uninsdeletevalue createvalueifdoesntexist;
+Root: HKCU; SubKey: Software\LevelZap; ValueType: multisz; ValueName: "MetaFiles"; ValueData: ""; Flags: uninsdeletevalue createvalueifdoesntexist;
 Root: HKCU; SubKey: Software\LevelZap; ValueType: dword; ValueName: "PromptUser"; ValueData: "0"; Flags: uninsdeletevalue createvalueifdoesntexist;
+Root: HKCU; SubKey: Software\LevelZap; ValueType: dword; ValueName: "Levels"; ValueData: "1"; Flags: uninsdeletevalue createvalueifdoesntexist;

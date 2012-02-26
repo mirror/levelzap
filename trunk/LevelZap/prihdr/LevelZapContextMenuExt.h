@@ -80,6 +80,7 @@ private:
 	HRESULT				FindFiles(const HWND p_hParentWnd,
 									CString szTo,
 									CString szFromPath,
+									DWORD& dwLevel,
 									CString& szlFrom,
 									CString& szlTo) const;
 
@@ -96,6 +97,7 @@ private:
 	HRESULT				DeleteFolder(const HWND p_hParentWnd,
 											CString p_Path) const;
 	CString				m_szMetaDir;
+	DWORD				m_dwLevels;
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(LevelZapContextMenuExt), CLevelZapContextMenuExt)
