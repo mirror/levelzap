@@ -1,4 +1,4 @@
-// Utilities.h
+// Dialog.h
 // (c) 2012, John Peterson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,26 +22,17 @@
 #pragma once
 
 //
-// Util
+// Dialog
 //
-// Utility class
+// Dialog class
 //
-class Util
-{
+class Dialog {
+	static bool bSelection;
+	static HRESULT CALLBACK CallbackProc(HWND hwnd, UINT uNotification, WPARAM wParam, LPARAM lParam, LONG_PTR dwRefData);
 public:
-	static void		OutputDebugStringEx(const wchar_t* format, ...);
-	static void		GetLastErrorEx();
-	static void		FormatMessageEx(DWORD dw);
-	static int		GetVersionEx2();
-	static CString	PathFindFolderName(CString szPath);
-	static CString	PathFindPreviousComponent(CString szPath);
-	static HRESULT	MoveFolderEx(CString& szFrom, CString& szTo);
-	static BOOL		PathFindFile(CString _szPath, CString _szFile);
-	static BOOL		PathIsDirectoryEmptyEx(CString _szPath);
-	static BOOL		IsMetaFile(CString fileEnding);
-	static DWORD	QueryDWORDValueEx(CString szValue);
-	static CString	QueryStringValueEx(CString szValue);
-	static LONG		QueryMultiStringValueEx(CString szValue, CAtlList<CString>& szArr);
-
-	static CAtlList<CString> m_szMetaFiles;
+	enum {
+		B_OK = 1,
+		B_CANCEL
+	};
+	static bool doModal(HWND, _U_STRINGorID);
 };

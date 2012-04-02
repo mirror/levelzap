@@ -21,7 +21,6 @@
 
 #include "stdafx.h"
 #include "resource.h"
-#include "LevelZap_i.h"
 #include "LevelZapTypes.h"
 #include "dllmain.h"
 #include "xdlldata.h"

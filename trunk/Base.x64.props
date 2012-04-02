@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <PreLinkEventUseInBuild>false</PreLinkEventUseInBuild>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <Link>
+      <RegisterOutput>false</RegisterOutput>
+    </Link>
+    <PreLinkEvent>
+      <Command>del "$(TargetPath)" /q
+if exist "$(TargetPath)" (
+taskkill /f /IM explorer.exe
+start %WinDir%\explorer.exe
+)</Command>
+    </PreLinkEvent>
+    <PreLinkEvent>
+      <Message>Restarting explorer.exe...</Message>
+    </PreLinkEvent>
+    <PostBuildEvent>
+      <Command>$(SolutionDir)3rdParty\Regsvr64.exe /s $(TargetPath)</Command>
+      <Message>Registering output (x64)...</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>
