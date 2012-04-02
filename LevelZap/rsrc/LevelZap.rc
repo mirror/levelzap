@@ -106,14 +106,24 @@ IDR_LEVELZAP            REGISTRY                "LevelZap.rgs"
 STRINGTABLE
 BEGIN
     IDS_PROJNAME            "LevelZap"
-    IDS_ZAP_MENU_ITEM_DESCRIPTION "&Zap files and folders"
+    IDS_ZAP_MENU_ITEM_DESCRIPTION "&Zap one level"
     IDS_ZAP_MENU_ITEM_HINT  "Moves the entire content of selected directory up one level and deletes the empty directory afterwards."
     IDS_MOVE_BEFORE_ZAP_DIALOG_TITLE "Moving files up one level..."
     IDS_ZAP_DIALOG_TITLE    "Zapping directory..."
-    IDS_ZAP_CONFIRM_MESSAGE_1 "Are you sure you want to zap """
-    IDS_ZAP_CONFIRM_MESSAGE_2 
+    IDS_ZAP_CONFIRM_MESSAGE_OLD_1 "Do you want to zap """
+    IDS_ZAP_CONFIRM_MESSAGE_OLD_2 
                             """ and move all its content up one directory level?"
-    IDS_ZAP_CONFIRM_CAPTION "Confirm zap"
+    IDS_ZAP_CONFIRM_CAPTION "Zap"
+    IDS_ZAP_CONFIRM         "Confirmation required"
+    IDS_ZAP_LEVEL           "Level directory structure"
+    IDS_ZAP_CONFIRM_OLD     "Do you want to level the directory structure?"
+    IDS_ZAP_CONTENT         "This action can't be undone"
+END
+
+STRINGTABLE
+BEGIN
+    IDS_ZAP_CONFIRM_MESSAGE_1 "Move up """
+    IDS_ZAP_CONFIRM_MESSAGE_2 """ contents one level"
 END
 
 #endif    // English (United States) resources

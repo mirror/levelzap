@@ -75,4 +75,3 @@ Root: HKCU; SubKey: Software\LevelZap; Flags: uninsdeletekey;
 Root: HKCU; SubKey: Software\LevelZap; ValueType: string; ValueName: "MetaDir"; ValueData: "_meta"; Flags: uninsdeletevalue createvalueifdoesntexist;
 Root: HKCU; SubKey: Software\LevelZap; ValueType: multisz; ValueName: "MetaFiles"; ValueData: ""; Flags: uninsdeletevalue createvalueifdoesntexist;
 Root: HKCU; SubKey: Software\LevelZap; ValueType: dword; ValueName: "PromptUser"; ValueData: "0"; Flags: uninsdeletevalue createvalueifdoesntexist;
-Root: HKCU; SubKey: Software\LevelZap; ValueType: dword; ValueName: "Levels"; ValueData: "1"; Flags: uninsdeletevalue createvalueifdoesntexist;

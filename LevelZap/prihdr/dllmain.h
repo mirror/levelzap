@@ -19,6 +19,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#include "LevelZap_i.h"
+
 class CLevelZapModule : public ATL::CAtlDllModuleT< CLevelZapModule >
 {
 public :

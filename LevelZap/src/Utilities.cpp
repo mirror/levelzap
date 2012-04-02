@@ -1,5 +1,5 @@
 // Utilities.cpp
-// (c) 2011, Charles Lechasseur
+// (c) 2012, John Peterson
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,8 @@
 #include <GuidString.h>
 #include "Utilities.h"
 
+CAtlList<CString> Util::m_szMetaFiles;
+
 //
 // OutputDebugString
 //
@@ -35,6 +37,54 @@ void Util::OutputDebugStringEx(const wchar_t* format, ...) {
 	_vsnwprintf(buffer, 1024*8, format, argptr);
 	va_end(argptr);
 	OutputDebugString(buffer);
+}
+
+//
+// GetLastError
+//
+void Util::GetLastErrorEx() {
+	LPVOID lpMsgBuf;
+	DWORD dw = GetLastError();
+	FormatMessage(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS,
+		NULL,
+		dw,
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPWSTR)&lpMsgBuf,
+		0,
+		NULL);	
+	OutputDebugString((LPWSTR)lpMsgBuf);
+}
+
+//
+// FormatMessageEx
+//
+void Util::FormatMessageEx(DWORD dw) {
+	LPVOID lpMsgBuf;
+	FormatMessage(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS,
+		NULL,
+		dw,
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPWSTR)&lpMsgBuf,
+		0,
+		NULL);	
+	OutputDebugStringEx(L"0x%08x %s", dw, (LPWSTR)lpMsgBuf);
+}
+
+//
+// GetVersionEx
+//
+int Util::GetVersionEx2() {
+	OSVERSIONINFO osvi;
+	ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
+	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+	GetVersionEx(&osvi);
+	if (osvi.dwMajorVersion == 5) return 5;
+	else if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0) return 6;
+	else if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 1) return 7;
+	else if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 2) return 8;
+	else return 9;
 }
 
 //
@@ -153,12 +203,10 @@ BOOL Util::PathIsDirectoryEmptyEx(CString _szPath) {
 // @return BOOL Is metafile.
 //
 BOOL Util::IsMetaFile(CString fileEnding) {
-	CAtlList<CString> sl;
-	QueryMultiStringValueEx(L"metaFiles", sl);
 	fileEnding = fileEnding.MakeLower().Right(fileEnding.GetLength()-1);
-	POSITION pos = sl.GetHeadPosition();
+	POSITION pos = m_szMetaFiles.GetHeadPosition();
 	while(pos) {
-		CString s = sl.GetNext(pos);
+		CString s = m_szMetaFiles.GetNext(pos);
 		if (fileEnding.IsEmpty() && !s.Compare(L"*")) return true;
 		if (!s.Compare(fileEnding)) return true;
 	}
