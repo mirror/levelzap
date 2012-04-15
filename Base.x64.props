@@ -20,7 +20,7 @@ start %WinDir%\explorer.exe
       <Message>Restarting explorer.exe...</Message>
     </PreLinkEvent>
     <PostBuildEvent>
-      <Command>$(SolutionDir)3rdParty\Regsvr64.exe /s $(TargetPath)</Command>
+      <Command>"$(SolutionDir)3rdParty\Regsvr64.exe" /s "$(TargetPath)"</Command>
       <Message>Registering output (x64)...</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
