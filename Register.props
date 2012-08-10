@@ -4,12 +4,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />
   <ItemDefinitionGroup>
+    <PreLinkEvent />
+    <PostBuildEvent />
     <Link>
       <RegisterOutput>true</RegisterOutput>
     </Link>
-    <Midl>
-      <TargetEnvironment>Win32</TargetEnvironment>
-    </Midl>
   </ItemDefinitionGroup>
   <ItemGroup />
 </Project>

@@ -126,6 +126,7 @@ HRESULT Util::MoveFolderEx(CString& szFrom, CString& szTo) {
 	}
 	if (!MoveFileEx(szFrom, szTo, 0)) {
 		OutputDebugStringEx(L"MOVE_FAILED: %s -> %s\n", szFrom, szTo);
+		GetLastErrorEx();
 		return E_FAIL;
 	}
 	return S_OK;
@@ -138,7 +139,7 @@ HRESULT Util::MoveFolderEx(CString& szFrom, CString& szTo) {
 // @param _szPath Filename to find.
 // @return BOOL File found.
 //
-BOOL Util::PathFindFile(CString _szPath, CString _szFile) {
+BOOL Util::PathFindFile(CString _szPath, CString _szFile, BOOL bRecursive) {
 	WIN32_FIND_DATA ffd;
 	HANDLE hFind;
 
@@ -152,8 +153,9 @@ BOOL Util::PathFindFile(CString _szPath, CString _szFile) {
 		CString szFileName(ffd.cFileName);
 		if ((ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
 			if (szFileName.Compare(L".") && szFileName.Compare(L"..")) {
-				if (!szFileName.CompareNoCase(_szFile)) goto ret;	
-				if (PathFindFile(_szPath + L"\\" + szFileName, _szFile)) goto ret;
+				if (!szFileName.CompareNoCase(_szFile)) goto ret;
+				if (bRecursive)
+					if (PathFindFile(_szPath + L"\\" + szFileName, _szFile)) goto ret;
 			}			
 		} else {
 			if (!szFileName.CompareNoCase(_szFile) && !IsMetaFile(PathFindExtension(szFileName))) goto ret;			
