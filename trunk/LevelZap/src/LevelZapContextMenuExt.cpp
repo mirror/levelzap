@@ -1,5 +1,5 @@
 // LevelZapContextMenuExt.cpp
-// (c) 2011, Charles Lechasseur
+// (c) 2011, Charles Lechasseur. 2012, John Peterson.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -335,9 +335,9 @@ HRESULT CLevelZapContextMenuExt::ZapFolder(const HWND p_hParentWnd,
     if (!p_rYesToAll && !m_bRecursive)
 		if (!Dialog::doModal(p_hParentWnd, Util::GetVersionEx2()>=6?confirmMsgComplete.GetBuffer():confirmMsgCompleteOld.GetBuffer())) return E_ABORT;
 	// Check for name collission
-	BOOL bRename = Util::PathFindFile(p_Folder, Util::PathFindFolderName(p_Folder));
+	BOOL bRename = Util::PathFindFile(p_Folder, Util::PathFindFolderName(p_Folder), m_bRecursive);
 	CString _p_Folder(p_Folder);
-	if (bRename) p_Folder.Empty();		
+	if (bRename) p_Folder.Empty();
 	if (bRename) if (!SUCCEEDED(Util::MoveFolderEx(_p_Folder, p_Folder))) return E_FAIL;
 	CString szlFrom, szlTo;
 	if (!SUCCEEDED(FindFiles(p_hParentWnd, Util::PathFindPreviousComponent(p_Folder), p_Folder, szlFrom, szlTo))) {
@@ -444,7 +444,7 @@ HRESULT CLevelZapContextMenuExt::MoveFile(const HWND p_hParentWnd,
 	fileOpStruct.wFunc = FO_MOVE;
 	p_Path.AppendChar(L'\0'); fileOpStruct.pFrom = p_Path;
 	p_FolderTo.AppendChar(L'\0'); fileOpStruct.pTo = p_FolderTo;
-	fileOpStruct.fFlags = FOF_MULTIDESTFILES | FOF_ALLOWUNDO | FOF_NOCONFIRMMKDIR | FOF_SILENT;
+	fileOpStruct.fFlags = FOF_MULTIDESTFILES | FOF_ALLOWUNDO | FOF_SILENT;
 	if (p_hParentWnd == 0) fileOpStruct.fFlags |= (FOF_NOCONFIRMATION | FOF_NOERRORUI);
 	int hRes = SHFileOperation(&fileOpStruct);
 	if (fileOpStruct.fAnyOperationsAborted) hRes = E_ABORT;

@@ -36,7 +36,7 @@ public:
 	static CString	PathFindFolderName(CString szPath);
 	static CString	PathFindPreviousComponent(CString szPath);
 	static HRESULT	MoveFolderEx(CString& szFrom, CString& szTo);
-	static BOOL		PathFindFile(CString _szPath, CString _szFile);
+	static BOOL		PathFindFile(CString _szPath, CString _szFile, BOOL bRecursive = true);
 	static BOOL		PathIsDirectoryEmptyEx(CString _szPath);
 	static BOOL		IsMetaFile(CString fileEnding);
 	static DWORD	QueryDWORDValueEx(CString szValue);
