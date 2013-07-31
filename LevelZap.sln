@@ -7,6 +7,8 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug.Register|Win32 = Debug.Register|Win32
 		Debug.Register|x64 = Debug.Register|x64
+		Debug.Test|Win32 = Debug.Test|Win32
+		Debug.Test|x64 = Debug.Test|x64
 		Debug|Win32 = Debug|Win32
 		Debug|x64 = Debug|x64
 		Release.Register|Win32 = Release.Register|Win32
@@ -19,6 +21,10 @@ Global
 		{2916757D-E196-4859-B9B1-0728691E3059}.Debug.Register|Win32.Build.0 = Debug.Register|Win32
 		{2916757D-E196-4859-B9B1-0728691E3059}.Debug.Register|x64.ActiveCfg = Debug.Register|x64
 		{2916757D-E196-4859-B9B1-0728691E3059}.Debug.Register|x64.Build.0 = Debug.Register|x64
+		{2916757D-E196-4859-B9B1-0728691E3059}.Debug.Test|Win32.ActiveCfg = Debug.Test|Win32
+		{2916757D-E196-4859-B9B1-0728691E3059}.Debug.Test|Win32.Build.0 = Debug.Test|Win32
+		{2916757D-E196-4859-B9B1-0728691E3059}.Debug.Test|x64.ActiveCfg = Debug.Test|x64
+		{2916757D-E196-4859-B9B1-0728691E3059}.Debug.Test|x64.Build.0 = Debug.Test|x64
 		{2916757D-E196-4859-B9B1-0728691E3059}.Debug|Win32.ActiveCfg = Debug|Win32
 		{2916757D-E196-4859-B9B1-0728691E3059}.Debug|Win32.Build.0 = Debug|Win32
 		{2916757D-E196-4859-B9B1-0728691E3059}.Debug|x64.ActiveCfg = Debug|x64
