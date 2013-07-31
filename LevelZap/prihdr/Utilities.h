@@ -38,10 +38,7 @@ public:
 	static HRESULT	MoveFolderEx(CString& szFrom, CString& szTo);
 	static BOOL		PathFindFile(CString _szPath, CString _szFile, BOOL bRecursive = true);
 	static BOOL		PathIsDirectoryEmptyEx(CString _szPath);
-	static BOOL		IsMetaFile(CString fileEnding);
 	static DWORD	QueryDWORDValueEx(CString szValue);
 	static CString	QueryStringValueEx(CString szValue);
 	static LONG		QueryMultiStringValueEx(CString szValue, CAtlList<CString>& szArr);
-
-	static CAtlList<CString> m_szMetaFiles;
 };

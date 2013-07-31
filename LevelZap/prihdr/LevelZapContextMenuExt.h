@@ -97,7 +97,6 @@ private:
 											CString p_FolderTo) const;
 	HRESULT				DeleteFolder(const HWND p_hParentWnd,
 											CString p_Path) const;
-	CString				m_szMetaDir;
 	BOOL				m_bRecursive;
 };
 

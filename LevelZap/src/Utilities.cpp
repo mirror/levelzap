@@ -23,8 +23,6 @@
 #include <GuidString.h>
 #include "Utilities.h"
 
-CAtlList<CString> Util::m_szMetaFiles;
-
 //
 // OutputDebugString
 //
@@ -153,12 +151,15 @@ BOOL Util::PathFindFile(CString _szPath, CString _szFile, BOOL bRecursive) {
 		CString szFileName(ffd.cFileName);
 		if ((ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
 			if (szFileName.Compare(L".") && szFileName.Compare(L"..")) {
-				if (!szFileName.CompareNoCase(_szFile)) goto ret;
+				if (!szFileName.CompareNoCase(_szFile))
+					goto ret;
 				if (bRecursive)
-					if (PathFindFile(_szPath + L"\\" + szFileName, _szFile)) goto ret;
+					if (PathFindFile(_szPath + L"\\" + szFileName, _szFile))
+						goto ret;
 			}			
 		} else {
-			if (!szFileName.CompareNoCase(_szFile) && !IsMetaFile(PathFindExtension(szFileName))) goto ret;			
+			if (!szFileName.CompareNoCase(_szFile))
+				goto ret;			
 		}
 	} while (FindNextFile(hFind, &ffd));
 
@@ -196,23 +197,6 @@ BOOL Util::PathIsDirectoryEmptyEx(CString _szPath) {
 
 	FindClose(hFind);
 	return true;
-}
-
-//
-// Indentify files by file ending
-//
-// @param fileEnding File ending.
-// @return BOOL Is metafile.
-//
-BOOL Util::IsMetaFile(CString fileEnding) {
-	fileEnding = fileEnding.MakeLower().Right(fileEnding.GetLength()-1);
-	POSITION pos = m_szMetaFiles.GetHeadPosition();
-	while(pos) {
-		CString s = m_szMetaFiles.GetNext(pos);
-		if (fileEnding.IsEmpty() && !s.Compare(L"*")) return true;
-		if (!s.Compare(fileEnding)) return true;
-	}
-	return false;
 }
 
 //

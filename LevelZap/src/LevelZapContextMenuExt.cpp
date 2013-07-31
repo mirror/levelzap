@@ -39,7 +39,6 @@ CLevelZapContextMenuExt::CLevelZapContextMenuExt()
       m_FirstCmdId(),
       m_ZapCmdId()
 {
-	Util::m_szMetaFiles.RemoveAll();
 }
 
 //
@@ -170,10 +169,9 @@ STDMETHODIMP CLevelZapContextMenuExt::InvokeCommand(
 	m_bRecursive = (GetKeyState(VK_CONTROL)&0x80);
 	if (m_bRecursive) {
 		// Confirm action
-		if (!Dialog::doModal(0, Util::GetVersionEx2()>=6?IDS_ZAP_LEVEL:IDS_ZAP_CONFIRM_OLD)) return E_ABORT;
-		Util::QueryMultiStringValueEx(L"metaFiles", Util::m_szMetaFiles);
+		if (!Dialog::doModal(0, Util::GetVersionEx2()>=6?IDS_ZAP_LEVEL:IDS_ZAP_CONFIRM_OLD))
+			return E_ABORT;
 	}
-	m_szMetaDir = Util::QueryStringValueEx(L"MetaDir"); if (m_szMetaDir.IsEmpty()) m_szMetaDir = L"_meta";
 
     try {
         if ((p_pCommandInfo == 0) || (p_pCommandInfo->cbSize < sizeof(CMINVOKECOMMANDINFO))) {
@@ -323,8 +321,7 @@ HRESULT CLevelZapContextMenuExt::ZapFolder(const HWND p_hParentWnd,
                                            CString p_Folder,
                                            bool& p_rYesToAll) const {
 	CString folderName = Util::PathFindFolderName(p_Folder);
-	// Check folder name
-	if (!folderName.Compare(m_szMetaDir) && m_bRecursive) return E_FAIL;
+
 	// Ask for confirmation.
 	CString confirmMsg1(MAKEINTRESOURCE(IDS_ZAP_CONFIRM_MESSAGE_1));
 	CString confirmMsg2(MAKEINTRESOURCE(IDS_ZAP_CONFIRM_MESSAGE_2));
@@ -334,16 +331,25 @@ HRESULT CLevelZapContextMenuExt::ZapFolder(const HWND p_hParentWnd,
 	CString confirmMsgCompleteOld = confirmMsgOld1 + folderName + confirmMsgOld2;
     if (!p_rYesToAll && !m_bRecursive)
 		if (!Dialog::doModal(p_hParentWnd, Util::GetVersionEx2()>=6?confirmMsgComplete.GetBuffer():confirmMsgCompleteOld.GetBuffer())) return E_ABORT;
+
 	// Check for name collission
 	BOOL bRename = Util::PathFindFile(p_Folder, Util::PathFindFolderName(p_Folder), m_bRecursive);
 	CString _p_Folder(p_Folder);
-	if (bRename) p_Folder.Empty();
-	if (bRename) if (!SUCCEEDED(Util::MoveFolderEx(_p_Folder, p_Folder))) return E_FAIL;
+	if (bRename)
+		p_Folder.Empty();
+	if (bRename) {
+		if (!SUCCEEDED(Util::MoveFolderEx(_p_Folder, p_Folder)))
+			return E_FAIL;
+	}
+
+	// create list of files to move
 	CString szlFrom, szlTo;
 	if (!SUCCEEDED(FindFiles(p_hParentWnd, Util::PathFindPreviousComponent(p_Folder), p_Folder, szlFrom, szlTo))) {
-		if (bRename) Util::MoveFolderEx(p_Folder, _p_Folder);
+		if (bRename)
+			Util::MoveFolderEx(p_Folder, _p_Folder);
 		return E_FAIL;
 	}
+
 	// Move files
 	if (SUCCEEDED(MoveFile(p_hParentWnd, szlFrom, szlTo))) {
 		// Delete source directory
@@ -368,7 +374,7 @@ HRESULT CLevelZapContextMenuExt::FindFiles(const HWND p_hParentWnd,
 	HANDLE hFind;
 	CString szPath;
 
-   	// File
+	// files are ignored
 	hFind = FindFirstFile(szFromPath, &ffd);
 	if (INVALID_HANDLE_VALUE == hFind) {
 		Util::OutputDebugStringEx(L"INVALID_HANDLE_VALUE: %s\n", szFromPath);
@@ -376,17 +382,12 @@ HRESULT CLevelZapContextMenuExt::FindFiles(const HWND p_hParentWnd,
 		return E_FAIL;
 	}
 	if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-		if (!Util::IsMetaFile(PathFindExtension(szFromPath))) return E_FAIL;
-		szlFrom.Append(szFromPath); szlFrom.AppendChar('\0');
-		szlTo.Append(szTo); szlTo.Append(L"\\");
-		szlTo.Append(m_szMetaDir); szlTo.Append(L"\\");
-		szlTo.Append(ffd.cFileName); szlTo.AppendChar('\0');
 		FindClose(hFind);
-		return S_OK;
+		return E_FAIL;
 	}
 	FindClose(hFind);
 
-	// Directory
+	// add folder members to move list
 	szPath.Append(szFromPath);
 	szPath.Append(L"\\*");
 	hFind = FindFirstFile(szPath, &ffd);
@@ -419,7 +420,6 @@ HRESULT CLevelZapContextMenuExt::FindFiles(const HWND p_hParentWnd,
 			szlFrom.Append(szPath); szlFrom.AppendChar('\0');
 			CString _szTo;
 			_szTo.Append(szTo);
-			if (Util::IsMetaFile(PathFindExtension(szPath))) { _szTo.Append(L"\\"); _szTo.Append(m_szMetaDir); }
 			_szTo.Append(L"\\"); _szTo.Append(szFileName);
 			szlTo.Append(_szTo); szlTo.AppendChar('\0');
 			Util::OutputDebugStringEx(L"    Move %s -> %s\n", szPath, _szTo);
