@@ -350,8 +350,8 @@ HRESULT CLevelZapContextMenuExt::ZapFolder(const HWND p_hParentWnd,
 		return E_FAIL;
 	}
 
-	// Move files
-	if (SUCCEEDED(MoveFile(p_hParentWnd, szlFrom, szlTo))) {
+	// move files and don't leave an empty folder
+	if (SUCCEEDED(MoveFile(p_hParentWnd, szlFrom, szlTo)) || Util::PathIsDirectoryEmptyEx(p_Folder)) {
 		// Delete source directory
 		DeleteFolder(p_hParentWnd, p_Folder);
 		return S_OK;
