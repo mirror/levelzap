@@ -8,7 +8,7 @@ set PLATFORM=%2
 set PROJECT=%3
 set ACTION=Build
 if %PLATFORM% == x64 (set MACHINE=x64) else (set MACHINE=x86)
-call "%VS100COMNTOOLS%..\..\VC\vcvarsall.bat" %MACHINE%
+call "%VS110COMNTOOLS%..\..\VC\vcvarsall.bat" %MACHINE%
 
 devenv /nologo LevelZap.sln /Project %PROJECT% /%ACTION% "%CONFIG%|%PLATFORM%"
 
