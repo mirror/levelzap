@@ -7,7 +7,7 @@ This file is a quick guide to the files found in the SVN repository of the Level
 
 1. LevelZap.sln
 
-Visual Studio 2010 solution file for the LevelZap project. The project is written in C++ using ATL. In order to build all targets, make sure to install the x64 Compiler and Tools option in Visual Studio when you install it.
+Visual Studio solution file for the LevelZap project. The project is written in C++ using ATL. In order to build all targets, make sure to install the x64 Compiler and Tools option in Visual Studio when you install it.
 
 
 2. Testing
