@@ -115,8 +115,8 @@ BEGIN
                             """ and move all its content up one directory level?"
     IDS_ZAP_CONFIRM_CAPTION "Zap"
     IDS_ZAP_CONFIRM         "Confirmation required"
-    IDS_ZAP_LEVEL           "Level directory structure"
-    IDS_ZAP_CONFIRM_OLD     "Do you want to level the directory structure?"
+    IDS_LEVEL_1             "Level """
+    IDS_LEVEL_OLD_1         "Do you want to level the """
     IDS_ZAP_CONTENT         "This action can't be undone"
 END
 
@@ -124,6 +124,12 @@ STRINGTABLE
 BEGIN
     IDS_ZAP_CONFIRM_MESSAGE_1 "Move up """
     IDS_ZAP_CONFIRM_MESSAGE_2 """ contents one level"
+END
+
+STRINGTABLE
+BEGIN
+    IDS_LEVEL_2             """ directory structure"
+    IDS_LEVEL_OLD_2         """ directory structure?"
 END
 
 #endif    // English (United States) resources

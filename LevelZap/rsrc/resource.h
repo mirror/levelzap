@@ -14,8 +14,12 @@
 #define IDS_ZAP_CONFIRM_CAPTION         107
 #define IDS_ZAP_CONFIRM                 108
 #define IDS_ZAP_LEVEL                   109
+#define IDS_LEVEL_1                     109
 #define IDS_ZAP_CONFIRM_OLD             110
+#define IDS_LEVEL_OLD_1                 110
 #define IDS_ZAP_CONTENT                 111
+#define IDS_LEVEL_2                     112
+#define IDS_LEVEL_OLD_2                 113
 #define IDS_ZAP_CONFIRM_MESSAGE_1       202
 #define IDS_ZAP_CONFIRM_MESSAGE_2       203
 

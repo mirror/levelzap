@@ -169,7 +169,14 @@ STDMETHODIMP CLevelZapContextMenuExt::InvokeCommand(
 	m_bRecursive = (GetKeyState(VK_CONTROL)&0x80);
 	if (m_bRecursive) {
 		// Confirm action
-		if (!Dialog::doModal(0, Util::GetVersionEx2()>=6?IDS_ZAP_LEVEL:IDS_ZAP_CONFIRM_OLD))
+		CString folderName = Util::PathFindFolderName(m_vFolders.at(0));
+		CString confirmMsg1(MAKEINTRESOURCE(IDS_LEVEL_1));
+		CString confirmMsg2(MAKEINTRESOURCE(IDS_LEVEL_2));
+		CString confirmMsgComplete = confirmMsg1 + folderName + confirmMsg2;
+		CString confirmMsgOld1(MAKEINTRESOURCE(IDS_LEVEL_OLD_1));
+		CString confirmMsgOld2(MAKEINTRESOURCE(IDS_LEVEL_OLD_2));
+		CString confirmMsgCompleteOld = confirmMsgOld1 + folderName + confirmMsgOld2;
+		if (!Dialog::doModal(0, Util::GetVersionEx2() >= 6 ? confirmMsgComplete.GetBuffer() : confirmMsgCompleteOld.GetBuffer()))
 			return E_ABORT;
 	}
 
